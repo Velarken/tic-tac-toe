@@ -1,7 +1,17 @@
-
+const clickedSpace = document.querySelectorAll('.space');
+for (space of clickedSpace) {
+    space.addEventListener('click',(clicked) => getID(clicked));
+}
+const markX = document.getElementById('x-mark');
+const markO = document.getElementById('o-mark');
+const teamX = document.getElementById('teamX');
+teamX.addEventListener('click', () => createTeamXPlayer());
+markX.addEventListener('click', (clicked) => turnRed(clicked));
+const resetGame = document.getElementById('reset-game');
+resetGame.addEventListener('click', () => Gameboard.resetBoard());
 const Gameboard = {
     // Flip 0 to 1 when space is occuped by 'X'
-    // Flip 0 to 2 when space is occupied by 2
+    // Flip 0 to 2 when space is occupied by 'O'
     gameboard: 
     [
         0,0,0,
@@ -10,27 +20,31 @@ const Gameboard = {
     ],
     init: function() {
         this.cacheDom();
-        this.bindEvents();
-        this.render();
+        //this.bindEvents();
+        //this.render();
     },
     cacheDom: function() {
         // Cache html elements on page and their relation to each other
         // to avoid multiple DOM searches
         this.space = document.querySelector('.space');
-        this.spaceID = space.id;
+        this.spaceID = this.space.id;
+        console.log(this.spaceID);
     },
     bindEvents: function() {
-
+        this.spaceID.addEventListener('click', Game.validMove(this.spaceID, 'x'));
     },
     render: function() {
-
+        // WIP
     },
     resetBoard: function() {
         this.gameboard = [0,0,0,0,0,0,0,0,0];
+        this.space.style.backgroundColor = 'black';
     },
 };
+Gameboard.init()
 const Game = {
     validMove:function(spaceToCheck,team) {
+        console.log('you are here')
         if (Gameboard.gameboard[spaceToCheck] === 2) {
             alert('occupied by O, try an empty square!');
         } else if (Gameboard.gameboard[spaceToCheck] === 1) {
@@ -38,6 +52,10 @@ const Game = {
         } else if (Gameboard.gameboard[spaceToCheck] === 0) {
             this.makeMove(spaceToCheck,team)
         }
+        // maybe add a section that counts how many remaining valid moves exist
+            // find number of 0's in Gameboard.gameboard, if that number === 0,
+            // prompt players the game is a draw, offer to reset gameboard
+            // didPlayersDraw();
     },
     makeMove: function(chosenSpace, team) {
         // Clean input string before logging
@@ -127,11 +145,24 @@ const Game = {
         }
     }
 };
-
-const Player = {
-    name: '', // take from player input
-    team:1, // 1 for x, 2 for o
-    wins:0, 
-    losses:0,
-    gamesPlayed:0
-};
+function getID(clicked) {
+    const clickedID = clicked.target.id;
+    let targeted = document.getElementById(clickedID);
+    targeted.style.backgroundColor = 'red';
+    if (targeted.style.backgroundColor = 'red') {
+        turnGreen(targeted);
+    } else if (targeted.style.backgroundColor = 'green') {
+        turnRed(targeted);
+    }
+    
+}
+function turnGreen(targeted) {
+    targeted.style.backgroundColor = 'green'
+}
+function turnRed(targeted) {
+    targeted.style.backgroundColor = 'red';
+}
+function createTeamXPlayer() {
+    xPlayer.name = window.prompt('What is your name?');
+    alert(`Hello, ${xPlayer.name}, welcome to team X!`);
+}
