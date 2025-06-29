@@ -1,15 +1,16 @@
 // Gameboard Module - Handle win condition, board reset, and space marking
 const Gameboard = (() => {
     // establish playable spaces
-    const playableSpaces = ['','','','','','','','',''];
+    let playableSpaces = ['','','','','','','','',''];
 
-    const createBoard = () => "";
-        // pass above variable to this function instead of ""
+    const createBoard = () => playableSpaces;
 
     const markSpace = (index,mark) => {
-        // if clicked space === ""
-            // replace "" with player.mark
-            // return true
+        if (playableSpaces[index] === '') {
+            playableSpaces[index] = mark;
+            return true; // successfully marked space
+        }
+        return false; // failed to mark space
     };
     const resetGameboard = () => {
         // reset playableSpaces variable to default
@@ -26,13 +27,17 @@ const Gameboard = (() => {
             [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
             [0, 4, 8], [2, 4, 6] // diagonals
         ];
-        // if a win condition is detected
-            // detect which player triggered winning combo
-            // return winning combo, player, 
-
-        // when checkRemainingSpaces returns false, run
+        // detect winning combo and assign win to player
+        for (let condition of winConditions) {
+            const [a,b,c] = condition;
+            // test for all 'x' or 'o' in winning combo
+            if (playableSpaces[a] && playableSpaces[a] === playableSpaces[b] && playableSpaces[a] === playableSpaces[c]) {
+                return { winner: playableSpaces[a], combination};
+            }
+        }
+        // trigger a tie if all spaces are full and no combo is triggered
         if (checkRemainingSpaces()) {
-            return // set winner as a tie, return combo of null
+            return {winner:'tie', combination:null};
         }
         return null;
     }
@@ -40,9 +45,8 @@ const Gameboard = (() => {
 })();
 
 // player object factory
-const Player= (name,mark) => {
-    return {name,mark};
-    // add wins:0, losses:0, ties
+const Player= (name,mark,wins,losses,ties) => {
+    return {name,mark,wins,losses,ties};
 };
 
 // game controller module
@@ -53,14 +57,14 @@ const GameController = (() => {
 
     const initPlayer = (xPlayer,oPlayer) => {
         players = [
-            Player(xPlayer,'x'),
-            Player(oPlayer,'o')
+            Player(xPlayer,'x',0,0,0),
+            Player(oPlayer,'o',0,0,0)
         ];
         playerIndex = 0;
     };
     const getCurrentPlayer = () => players[playerIndex];
     const swapPlayer = () => {
-        currentPlayerIndex = currentPlayerIndex === 0 ? 1 : 0;
+        playerIndex = playerIndex === 0 ? 1 : 0;
     };
     const startGame = () => {
         // triggers on form completion, or form bypass
@@ -115,30 +119,41 @@ const GameController = (() => {
 
 // display controller module
 const DisplayController = (() => {
-    // create selectors for all needed html elements
-        // use ID's for most everything
-        // queryselectorall for the gameboard spaces
+    // DOM selectors
+    const setupForm = document.getElementById('setupForm');
+    const gameContainer = document.getElementById('gameContainer');
+    const gameBoard = document.getElementById('gameBoard');
+    const turnDisplay = document.getElementById('turnDisplay');
+    const gameResult = document.getElementById('gameResults');
+    // buttons
+    const startGameButton = document.getElementById('startButton');
+    const restartGameButton = document.getElementById('restartButton');
+    // player name selectors
+    const xPlayerName = document.getElementById('xPlayerName');
+    const oPlayerName = document.getElementById('oPlayerName');
+    // gameboard space selector
+    const spaces = document.querySelectorAll('.space');
     
     const gameStartup = () => {
-        // selector for the div containing input form 
-            // variable.style.display = 'block/flex'
-        // selector for the div containing gameboard
-            // variable.style.display = 'none
+        setupForm.style.display = 'flex';
+        gameContainer.style.display = 'none';
     };
     const showGameboard = () => {
-        // selector for the div containing gameboard 
-            // variable.style.display = 'block/flex'
-        // selector for the div containing input form
-            // variable.style.display = 'none
+        setupForm.style.display = 'none';
+        gameContainer.style.display = 'flex';
     };
     const spaceTaken = () => {
-        const board = Gameboard.createBoard();
-        // selector for all gameboard spaces
-            // variable.forEach(space,index) => {}
-                // update text content for the space with player.mark
-                // if space isn't ''
-                    // add class to selected space denoting it is taken
-                    // add class (board[index].toLowerCase()
+        // sets board equal to playableSpaces
+        const board = Gameboard.createBoard(); 
+        spaces.forEach((space,index) => {
+            space.textContent = board[index]; // shows player.mark
+            space.className = 'space';
+            // if space is marked, apply player mark and 'taken' to class list
+            if (board[index] !== '') {
+                space.classList.add('taken');
+                space.classList.add(board[index].toLowerCase())
+            }
+        });
     };
     const displayCurrentPlayer = (player) => {
         // display active team
